@@ -1,6 +1,7 @@
 import pygame
 import random
 import sys
+import math
 
 pygame.init()
 
@@ -26,6 +27,8 @@ class Player(object):
         self.explosion_size = 20
         self.coll = False
 
+        self.angle = 0
+
     def DeathScreen(self):
         run = True
         while run:
@@ -42,10 +45,11 @@ class Player(object):
                         reset_game()
 
             screen.fill("black")
-
-            self.death_text = fontBig.render("YOU DIED",False,"white")
-            self.retry_text = fontMedium.render("Press 'r' to restart",False,"white")
+            self.death_text = fontBig.render("YOU DIED",False,"red")
+            self.end_score = fontMedium.render(f"SCORE {me.score}",False,"green")
+            self.retry_text = fontMedium.render("Press 'r' to restart",False,"green")
             screen.blit(self.death_text,(170,50))
+            screen.blit(self.end_score,(280,200))
             screen.blit(self.retry_text,(150,300))
 
             pygame.display.update()
@@ -65,18 +69,56 @@ class Player(object):
 
 
     def update(self):
+
         pressed = pygame.key.get_pressed()
+
         if pressed[pygame.K_d]:
             self.center[0] += self.speed
+            self.angle += 1
         elif pressed[pygame.K_s]:
             self.center[1] += self.speed
+            self.angle -= 1
         elif pressed[pygame.K_w]:
             self.center[1] -= self.speed
+            self.angle += 1
         elif pressed[pygame.K_a]:
             self.center[0] -= self.speed
-        
+            self.angle -= 1
+        else:
+            self.speed = 5
 
-        self.points = self.points = [(self.center[0] + x, self.center[1] + y) for x, y in self.relative_points]
+        if pressed[pygame.K_d] and pressed[pygame.K_w]:
+            self.speed = 3
+            self.center[0] += self.speed
+            self.center[1] -= self.speed
+        elif pressed[pygame.K_a] and pressed[pygame.K_w]:
+            self.speed = 3
+            self.center[0] -= self.speed
+            self.center[1] -= self.speed
+        elif pressed[pygame.K_d] and pressed[pygame.K_s]:
+            self.speed = 3
+            self.center[0] += self.speed
+            self.center[1] += self.speed
+        elif pressed[pygame.K_a] and pressed[pygame.K_s]:
+            self.speed = 3
+            self.center[0] -= self.speed
+            self.center[1] += self.speed
+        else:
+            self.speed = 5
+
+
+
+        if self.center[0] < 30:
+            self.center[0] = 30
+        elif self.center[0] > width - 10:
+            self.center[0] = width - 10
+
+        if self.center[1] < 30:
+            self.center[1] = 30
+        elif self.center[1] > height - 10:
+            self.center[1] = height - 13
+        
+        self.points =  [(self.center[0] + x, self.center[1] + y) for x, y in self.relative_points]
 
         self.player = pygame.draw.polygon(screen, "white", self.points, 1)
         self.player_health_text = font.render(f"HEALTH {self.player_live}",False,"white")
@@ -99,6 +141,7 @@ class Meteor(object):
 
         self.pos = (self.meteor_x,self.meteor_y)
         self.timer = pygame.time.get_ticks()
+        self.timerDuration = 1000
         self.meteorRect = pygame.Rect(self.meteor_x,self.meteor_y,20,20)
 
         self.score = 0
@@ -109,20 +152,31 @@ class Meteor(object):
 
     def spawn_meteor(self):
         self.elapsedTime = pygame.time.get_ticks() - self.timer
-        if self.elapsedTime >= 1000:
+        if self.elapsedTime >= self.timerDuration:
             self.timer = pygame.time.get_ticks()
             self.score += 1
-            new_meteor = Meteor(random.randint(500,width),random.randint(0,height),3)
-            meteor.append(new_meteor)
-        
+
+            for i,_ in enumerate(meteor):
+                if i+1 <= 10:
+                    new_meteor = Meteor(random.randint(500,width),random.randint(0,height),3)
+                    meteor.append(new_meteor)
+
+
+
+    def faster_meteor(self):
+        self.elapsedTime = pygame.time.get_ticks() - self.timer
+        if self.elapsedTime >= 1000:
+            self.current = pygame.time.get_ticks()
+            self.speed += 1
+        print(self.elapsedTime)
 
 
     def update(self):
         global num_meteor
+        #self.faster_meteor()
         self.meteor = pygame.draw.circle(screen,"white",self.pos,20,1)
         self.meteorRect = pygame.Rect(self.meteor_x,self.meteor_y,20,20)
         self.pos = (self.meteor_x,self.meteor_y)
-        
         self.meteor_x -= self.speed
 
         if self.meteor_x <= 1:
@@ -130,9 +184,10 @@ class Meteor(object):
                 meteor.remove(self)
 
 def reset_game():
-    global p,meteor
+    global p,meteor,num_meteor
     p = Player(5)
-    meteor = []
+    #meteor = []
+    me.meteor_x += 500
     me.score = -1
     
 
