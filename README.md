@@ -5,7 +5,7 @@
 
 Neulich habe ich auf unserem Schulserver ein Spiel namens "Bubble Master" oder etwas Ähnliches entdeckt. In dem Spiel spielt man ein U-Boot und muss versuchen, großen Blasen auszuweichen.
 
-Das hat mich auf die Idee gebracht, ein ähnliches Spiel selbst in Pygame zu entwickeln.
+Das hat mich auf die Idee gebracht, ein ähnliches Spiel in Pygame zu entwickeln.
 
 # Usage
 Falls du es selbst spielen möchtest hier die Anleitung wie:
