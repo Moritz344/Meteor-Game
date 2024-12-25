@@ -20,7 +20,7 @@ python3 main.py
 
 # Requirements
 - pygame
-- python
+- python3
 
 # Author
 - Moritz344
