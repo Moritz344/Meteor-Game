@@ -22,7 +22,7 @@ class Player(object):
         self.speed = speed
         self.center = [100,300]
         self.relative_points = [(-20, -10), (0, 0), (-20, 10)]
-        self.player_live = 1
+        self.player_live = 3
 
         self.explosion_size = 20
         self.coll = False
@@ -138,30 +138,41 @@ class Meteor(object):
         self.speed = speed
         self.meteor_x = x
         self.meteor_y = y
+        self.max_meteor = 50
 
         self.pos = (self.meteor_x,self.meteor_y)
+        self.unique = []
         self.timer = pygame.time.get_ticks()
-        self.timerDuration = 1000
+        self.timerDuration = 100
         self.meteorRect = pygame.Rect(self.meteor_x,self.meteor_y,20,20)
 
         self.score = 0
     def debug_info(self,font):
         self.score_text = font.render(f"SCORE {self.score}",False,"white")
         screen.blit(self.score_text,(10,0))
-
+    
+    def friendlyfire(self,new_meteor):
+        # meteoriten kollidieren miteinander
+        for m in meteor:
+            if new_meteor.meteorRect.colliderect(m.meteorRect):
+                return True
+        return False
 
     def spawn_meteor(self):
         self.elapsedTime = pygame.time.get_ticks() - self.timer
         if self.elapsedTime >= self.timerDuration:
             self.timer = pygame.time.get_ticks()
-            self.score += 1
+            self.score += 0.5
+            
+            for _ in range(10):
+                new_x = random.randint(500,width)
+                new_y = random.randint(0,height)
+                new_meteor = Meteor(new_x,new_y,3)
 
-            for i,_ in enumerate(meteor):
-                if i+1 <= 10:
-                    new_meteor = Meteor(random.randint(500,width),random.randint(0,height),3)
+                if not self.friendlyfire(new_meteor,):
                     meteor.append(new_meteor)
-
-
+                    break
+                
 
     def faster_meteor(self):
         self.elapsedTime = pygame.time.get_ticks() - self.timer
@@ -175,8 +186,14 @@ class Meteor(object):
         global num_meteor
         #self.faster_meteor()
         self.meteor = pygame.draw.circle(screen,"white",self.pos,20,1)
-        self.meteorRect = pygame.Rect(self.meteor_x,self.meteor_y,20,20)
+        self.meteorRect = pygame.Rect(self.meteor_x - 20,self.meteor_y - 25,50,50)
         self.pos = (self.meteor_x,self.meteor_y)
+        
+        for i,_ in enumerate(meteor):
+            if i > 50:
+                if self in meteor:
+                    meteor.remove(self)
+        
         self.meteor_x -= self.speed
 
         if self.meteor_x <= 1:
@@ -187,8 +204,10 @@ def reset_game():
     global p,meteor,num_meteor
     p = Player(5)
     #meteor = []
-    me.meteor_x += 500
+    for m in meteor:
+        m.meteor_x += 100
     me.score = -1
+
     
 
 
