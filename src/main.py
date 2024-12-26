@@ -68,7 +68,6 @@ def startMenu():
             hard_mode_text = fontMedium.render("HARD",False,"red")
         else:
             hard_mode_text = fontMedium.render("HARD",False,"white")
-        preview_image = pygame.image.load("preview.png")
         title_image = pygame.image.load("Title.png")
         #screen.blit(preview_image,(0,0))
         #screen.blit(background_image,(0,0))
