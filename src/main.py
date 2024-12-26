@@ -17,6 +17,75 @@ font = pygame.font.Font("MinecraftRegular.otf",30)
 fontBig = pygame.font.Font("MinecraftRegular.otf",100) 
 fontMedium = pygame.font.Font("MinecraftRegular.otf",50) 
 
+def draw_rounded_rect(surface, color, rect, radius):
+    x, y, width, height = rect
+
+    # Zeichne das mittlere Rechteck
+    pygame.draw.rect(surface, color, (x + radius, y, width - 2 * radius, height))
+    pygame.draw.rect(surface, color, (x, y + radius, width, height - 2 * radius))
+
+    # Zeichne die vier Ecken als Kreise
+    pygame.draw.circle(surface, color, (x + radius, y + radius), radius)  # Oben links
+    pygame.draw.circle(surface, color, (x + width - radius, y + radius), radius)  # Oben rechts
+    pygame.draw.circle(surface, color, (x + radius, y + height - radius), radius)  # Unten links
+    pygame.draw.circle(surface, color, (x + width - radius, y + height - radius), radius)  # Unten rechts
+
+
+
+def startMenu():
+    run = True
+    while run:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_q:
+                    pygame.quit()
+                    exit()
+
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if easy_mode_textRect.collidepoint(event.pos):
+                    run = False
+
+        screen.fill("black")
+        mouse_pos = pygame.mouse.get_pos()
+        
+        easy_mode_textRect = pygame.Rect(100,500,100,100)
+        medium_mode_textRect = pygame.Rect(300,500,200,50)
+        hard_mode_textRect = pygame.Rect(550,500,100,50)
+        
+        if easy_mode_textRect.collidepoint(mouse_pos):
+            easy_mode_text = fontMedium.render("EASY",False,"green")
+        else:
+            easy_mode_text = fontMedium.render("EASY",False,"white")
+
+        if medium_mode_textRect.collidepoint(mouse_pos):
+            medium_mode_text = fontMedium.render("MEDIUM",False,"green")
+        else:
+            medium_mode_text = fontMedium.render("MEDIUM",False,"white")
+
+        if hard_mode_textRect.collidepoint(mouse_pos):
+            hard_mode_text = fontMedium.render("HARD",False,"red")
+        else:
+            hard_mode_text = fontMedium.render("HARD",False,"white")
+        preview_image = pygame.image.load("preview.png")
+        title_image = pygame.image.load("Title.png")
+        #screen.blit(preview_image,(0,0))
+        #screen.blit(background_image,(0,0))
+        draw_rounded_rect(screen, (32, 30, 31), (80,480,150,80), 30)
+        draw_rounded_rect(screen, (32,30,31), (285,480,200,80), 30)
+        draw_rounded_rect(screen, (32, 30, 31), (531,480,150,80), 30)
+
+        screen.blit(easy_mode_text,(100,500))
+        screen.blit(title_image,(0,-200))
+        screen.blit(medium_mode_text,(300,500))
+        screen.blit(hard_mode_text,(550,500))
+        
+        clock.tick(60)
+        pygame.display.update()
+
+startMenu()
+
 class Player(object):
     def __init__(self,speed):
         self.speed = speed
@@ -134,17 +203,18 @@ class Player(object):
         self.player_live = round(self.player_live,2)
 
 class Meteor(object):
-    def __init__(self,x,y,speed):
+    def __init__(self,x,y,speed,size):
         self.speed = speed
         self.meteor_x = x
         self.meteor_y = y
         self.max_meteor = 50
+        self.meteor_size = size
 
         self.pos = (self.meteor_x,self.meteor_y)
         self.unique = []
         self.timer = pygame.time.get_ticks()
-        self.timerDuration = 100
-        self.meteorRect = pygame.Rect(self.meteor_x,self.meteor_y,20,20)
+        self.timerDuration = 500
+        self.meteorRect = pygame.Rect(self.meteor_x,self.meteor_y,self.meteor_size,self.meteor_size)
 
         self.score = 0
     def debug_info(self,font):
@@ -164,10 +234,11 @@ class Meteor(object):
             self.timer = pygame.time.get_ticks()
             self.score += 0.5
             
-            for _ in range(10):
+            for _ in range(5):
                 new_x = random.randint(500,width)
                 new_y = random.randint(0,height)
-                new_meteor = Meteor(new_x,new_y,3)
+                new_size = random.randint(10,20)
+                new_meteor = Meteor(new_x,new_y,3,new_size)
 
                 if not self.friendlyfire(new_meteor,):
                     meteor.append(new_meteor)
@@ -185,7 +256,7 @@ class Meteor(object):
     def update(self):
         global num_meteor
         #self.faster_meteor()
-        self.meteor = pygame.draw.circle(screen,"white",self.pos,20,1)
+        self.meteor = pygame.draw.circle(screen,"white",self.pos,self.meteor_size,1)
         self.meteorRect = pygame.Rect(self.meteor_x - 20,self.meteor_y - 25,50,50)
         self.pos = (self.meteor_x,self.meteor_y)
         
@@ -205,16 +276,16 @@ def reset_game():
     p = Player(5)
     #meteor = []
     for m in meteor:
-        m.meteor_x += 100
+        meteor.remove(m)
     me.score = -1
 
     
 
 
-meteor = [Meteor(random.randint(300,width),random.randint(0,height),3) for _ in range(num_meteor)]
+meteor = [Meteor(random.randint(300,width),random.randint(0,height), random.randint(10,20),3) for _ in range(num_meteor)]
 p = Player(5)
 
-me = Meteor(random.randint(300,width),random.randint(0,height),3) 
+me = Meteor(random.randint(300,width),random.randint(0,height), random.randint(10,20),3) 
 def main():
     run = True
     while run:
@@ -223,7 +294,11 @@ def main():
                 run = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
-                    run = False
+                    pygame.quit()
+                    exit()
+                elif event.key == pygame.K_ESCAPE:
+                    startMenu()
+
         screen.fill("black")
         
         me.debug_info(font)
