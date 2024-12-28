@@ -15,7 +15,6 @@ git clone https://github.com/Moritz344/Meteor-Game.git
 cd Meteor-Game
 cd src
 python3 main.py
-
 ```
 
 # Requirements
