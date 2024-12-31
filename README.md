@@ -7,6 +7,13 @@ Neulich habe ich auf unserem Schulserver ein Spiel namens "Bubble Master" oder e
 
 Das hat mich auf die Idee gebracht, ein ähnliches Spiel in Pygame zu entwickeln.
 
+# Wie es aussieht 👀
+
+
+https://github.com/user-attachments/assets/0846947f-5fd0-4b4a-b516-bca32ff53fdd
+
+
+
 # Usage
 Falls du es selbst spielen möchtest hier die Anleitung wie:
 - Öffne dein gewünschtes Terminal und gib folgendes ein:
